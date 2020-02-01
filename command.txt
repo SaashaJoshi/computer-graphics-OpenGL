@@ -1,0 +1,1 @@
+g++ lineDDA2.cc -lglut -lGL -lGLEW -lGLU
