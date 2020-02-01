@@ -1,0 +1,164 @@
+#include <stdio.h>
+#include <iostream>
+#include <GL/glut.h>
+using namespace std;
+
+int r = 60;
+int xc = 400;
+int yc = 600 - 300;
+int sides = 8;
+
+void circle(void);
+
+void plotpoint(int x, int y)
+{
+	glBegin(GL_POINTS);
+	glVertex2i(x+xc, y+yc);
+	glEnd();
+}
+
+void bound_it(int x, int y, float* fillColor, float* bc)
+{
+
+    float color[3];
+    glReadPixels(x,y,1.0,1.0,GL_RGB,GL_FLOAT,color);
+    if((color[0]!=bc[0] || color[1]!=bc[1] || color[2]!=bc[2])&&(color[0]!=fillColor[0] || color[1]!=fillColor[1] || color[2]!=fillColor[2]))
+     {
+        glColor3f(fillColor[0],fillColor[1],fillColor[2]);
+        glBegin(GL_POINTS);
+        glVertex2i(x,y);
+        glEnd();
+        glFlush();
+        bound_it(x+1,y,fillColor,bc);
+        bound_it(x,y+1,fillColor,bc);
+        bound_it(x-1,y,fillColor,bc);
+        bound_it(x,y-1,fillColor,bc);
+
+     }
+}
+
+void bound_ix(int x, int y, float* fillColor, float* bc)
+{
+
+    float color[3];
+    glReadPixels(x,y,1.0,1.0,GL_RGB,GL_FLOAT,color);
+    if((color[0]!=bc[0] || color[1]!=bc[1] || color[2]!=bc[2])&&(color[0]!=fillColor[0] || color[1]!=fillColor[1] || color[2]!=fillColor[2]))
+     {
+        glColor3f(fillColor[0],fillColor[1],fillColor[2]);
+        glBegin(GL_POINTS);
+        glVertex2i(x,y);
+        glEnd();
+        glFlush();
+        bound_it(x-1,y,fillColor,bc);
+        bound_it(x,y-1,fillColor,bc);
+        bound_it(x+1,y,fillColor,bc);
+        bound_it(x,y+1,fillColor,bc);
+
+     }
+}
+
+void mouse(GLint button, GLint action, GLint xm, GLint ym)
+{
+    if (button == GLUT_LEFT_BUTTON && action == GLUT_DOWN)
+    {
+        circle();
+        float bc[] = {0,0,0};
+        float fc[] = {0,0,1};
+        float ac[] = {0,1,0};
+        float cc[] = {1,0,0};
+        float dc[] = {1,1,0};
+        float gc[] = {0,1,1};
+        float tc[] = {1,0,1};
+        float tt[] = {0.5,0,1};
+        float st[] = {1,0,0.5};
+        bound_it(402, 600-250, ac, bc); // 1
+        bound_it(450, 600-280, tc, bc); // 2
+        bound_it(450, 600-320, gc, bc); // 3
+        bound_it(402, 600-350, fc, bc); // 4
+        bound_it(398, 600-350, cc, bc); // 5
+        //bound_ix(350, 600-320, tt, bc); // 6
+        //bound_ix(350, 600-280, st, bc); // 7
+        bound_it(398, 600-250, dc, bc); // 8
+    }
+
+    glFlush();
+}
+
+
+void myInit (void)
+{
+	glClearColor(1, 1, 1, 0.0);
+	glColor3f(0.0f, 0.0f, 0.0f);
+	glPointSize(1.0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(0, 840, 0, 600);
+}
+
+void circle()
+{
+	int x = 0;
+	int y = r;
+	float p = 5/4 - r;
+	plotpoint(x, y);
+
+	while (y >= x)
+	{
+		if (p < 0)
+		{
+			x++;
+			p = p + 2*x+1;
+		}
+		else
+		{
+			y--;
+			x++;
+			p = p + 2*(x-y)+1;
+		}
+        for (int i=-60; i<=60; i++)
+        {
+            plotpoint(0, i);
+            plotpoint(i, 0);
+        }
+        for (int i =-42; i <=42; i++)
+        {
+            plotpoint(i, i);
+            plotpoint(-i, i);
+        }
+
+		plotpoint(x, y);
+		plotpoint(x, -y);
+		plotpoint(-x, y);
+		plotpoint(-x, -y);
+		plotpoint(y, x);
+		plotpoint(-y, x);
+		plotpoint(y, -x);
+		plotpoint(-y, -x);
+	}
+
+}
+
+void myDisplay(void)
+{
+	glClear (GL_COLOR_BUFFER_BIT);
+	glColor3f (0.0, 0.0, 0.0);
+	glBegin(GL_LINE_STRIP);
+	glPointSize(1);
+	glFlush ();
+
+}
+
+int main(int argc, char** argv)
+{
+	glutInit(&argc, argv);
+	glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowSize (840, 600);
+	glutInitWindowPosition (0, 0);
+	glutCreateWindow ("Mid Point Circle Algorithm");
+	glutDisplayFunc(myDisplay);
+	glutMouseFunc(mouse);
+	myInit ();
+	glutMainLoop();
+	return 0;
+
+}
